@@ -12,6 +12,7 @@ import {
   Image,
   View,
   Text,
+  Platform,
 } from 'react-native';
 import padStart from 'lodash/padStart';
 import RNEnablePipInAndroid from 'react-native-enable-pip-in-android';
@@ -979,7 +980,9 @@ export default class VideoPlayer extends Component {
             {volumeControl}
             {fullscreenControl}
           </View>
-          {this.props.pictureInPictureIcon && pipControl}
+          {Platform.OS === 'android' &&
+            this.props.pictureInPictureIcon &&
+            pipControl}
         </SafeAreaView>
       </Animated.View>
     );
