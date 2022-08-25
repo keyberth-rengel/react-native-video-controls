@@ -14,6 +14,7 @@ import {
   Text,
 } from 'react-native';
 import padStart from 'lodash/padStart';
+import RNEnablePipInAndroid from 'react-native-enable-pip-in-android';
 
 export default class VideoPlayer extends Component {
   static defaultProps = {
@@ -161,7 +162,7 @@ export default class VideoPlayer extends Component {
     };
   }
 
-  componentDidUpdate = prevProps => {
+  componentDidUpdate = (prevProps) => {
     const {isFullscreen} = this.props;
 
     if (prevProps.isFullscreen !== isFullscreen) {
@@ -959,6 +960,10 @@ export default class VideoPlayer extends Component {
       ? this.renderNullControl()
       : this.renderFullscreen();
 
+    const pipControl = this.props.disablePictureInPicture
+      ? this.renderNullControl()
+      : this.renderPip();
+
     return (
       <Animated.View
         style={[
@@ -968,18 +973,14 @@ export default class VideoPlayer extends Component {
             marginTop: this.animations.topControl.marginTop,
           },
         ]}>
-        <ImageBackground
-          source={require('./assets/img/top-vignette.png')}
-          style={[styles.controls.column]}
-          imageStyle={[styles.controls.vignette]}>
-          <SafeAreaView style={styles.controls.topControlGroup}>
-            {backControl}
-            <View style={styles.controls.pullRight}>
-              {volumeControl}
-              {fullscreenControl}
-            </View>
-          </SafeAreaView>
-        </ImageBackground>
+        <SafeAreaView style={styles.controls.topControlGroup}>
+          {backControl}
+          <View style={styles.controls.pullRight}>
+            {volumeControl}
+            {fullscreenControl}
+          </View>
+          {this.props.pictureInPictureIcon && pipControl}
+        </SafeAreaView>
       </Animated.View>
     );
   }
@@ -995,6 +996,38 @@ export default class VideoPlayer extends Component {
       />,
       this.events.onBack,
       styles.controls.back,
+    );
+  }
+
+  /**
+   * Render button Picture in Picture
+   */
+  renderPip() {
+    const pictureInPictureStart = () => {
+      this._onScreenTouch();
+
+      setTimeout(() => {
+        this.setState({
+          ...this.state,
+          pictureInPictureStart: true,
+        });
+        RNEnablePipInAndroid.enterPictureInPictureMode();
+      }, 500);
+    };
+
+    return (
+      <TouchableOpacity
+        onPress={pictureInPictureStart}
+        style={this.props.pictureInPictureIcon ? {} : styles.pip.button}>
+        {this.props.pictureInPictureIcon ? (
+          <Image
+            style={styles.controls.pip}
+            source={require('./assets/img/icon-pip.png')}
+          />
+        ) : (
+          <Text style={styles.pip.text}>Picture in Picture</Text>
+        )}
+      </TouchableOpacity>
     );
   }
 
@@ -1087,7 +1120,7 @@ export default class VideoPlayer extends Component {
         {...this.player.seekPanResponder.panHandlers}>
         <View
           style={styles.seekbar.track}
-          onLayout={event =>
+          onLayout={(event) =>
             (this.player.seekerWidth = event.nativeEvent.layout.width)
           }
           pointerEvents={'none'}>
@@ -1217,7 +1250,7 @@ export default class VideoPlayer extends Component {
         <View style={[styles.player.container, this.styles.containerStyle]}>
           <Video
             {...this.props}
-            ref={videoPlayer => (this.player.ref = videoPlayer)}
+            ref={(videoPlayer) => (this.player.ref = videoPlayer)}
             resizeMode={this.state.resizeMode}
             volume={this.state.volume}
             paused={this.state.paused}
@@ -1248,6 +1281,18 @@ export default class VideoPlayer extends Component {
  * And then there's volume/seeker styles.
  */
 const styles = {
+  pip: StyleSheet.create({
+    button: {
+      borderColor: '#fff',
+      borderWidth: 1,
+      borderRadius: 5,
+      backgroundColor: 'black',
+      padding: 4,
+    },
+    text: {
+      color: 'white',
+    },
+  }),
   player: StyleSheet.create({
     container: {
       overflow: 'hidden',
@@ -1344,7 +1389,7 @@ const styles = {
       flexDirection: 'row',
       width: null,
       margin: 12,
-      marginBottom: 18,
+      marginBottom: 0,
     },
     bottomControlGroup: {
       alignSelf: 'stretch',
@@ -1364,6 +1409,10 @@ const styles = {
       position: 'relative',
       width: 80,
       zIndex: 0,
+    },
+    pip: {
+      width: 30,
+      height: 30,
     },
     title: {
       alignItems: 'center',
