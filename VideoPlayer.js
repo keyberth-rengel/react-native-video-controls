@@ -1019,20 +1019,30 @@ export default class VideoPlayer extends Component {
       }, 500);
     };
 
-    return (
-      <TouchableOpacity
-        onPress={pictureInPictureStart}
-        style={this.props.pictureInPictureIcon ? {} : styles.pip.button}>
-        {this.props.pictureInPictureIcon ? (
-          <Image
-            style={styles.controls.pip}
-            source={require('./assets/img/icon-pip.png')}
-          />
-        ) : (
-          <Text style={styles.pip.text}>Picture in Picture</Text>
-        )}
-      </TouchableOpacity>
+    return this.renderControl(
+      this.props.pictureInPictureIcon ? (
+        <Image
+          style={styles.controls.pip}
+          source={require('./assets/img/icon-pip.png')}
+        />
+      ) : (
+        <Text style={styles.pip.text}>Picture in Picture</Text>
+      ),
+      pictureInPictureStart,
+      this.props.pictureInPictureIcon ? {} : styles.pip.button,
     );
+    // <TouchableOpacity
+    //   onPress={pictureInPictureStart}
+    //   style={this.props.pictureInPictureIcon ? {} : styles.pip.button}>
+    //   {this.props.pictureInPictureIcon ? (
+    //     <Image
+    //       style={styles.controls.pip}
+    //       source={require('./assets/img/icon-pip.png')}
+    //     />
+    //   ) : (
+    //     <Text style={styles.pip.text}>Picture in Picture</Text>
+    //   )}
+    // </TouchableOpacity>
   }
 
   /**
