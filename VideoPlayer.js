@@ -3,7 +3,6 @@ import Video from 'react-native-video';
 import {
   TouchableWithoutFeedback,
   TouchableHighlight,
-  TouchableOpacity,
   ImageBackground,
   PanResponder,
   StyleSheet,
